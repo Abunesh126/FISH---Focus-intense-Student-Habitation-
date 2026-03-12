@@ -11,5 +11,10 @@ export default defineConfig(({ mode }) => {
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',
     },
+    build: {
+      rollupOptions: {
+        external: ['better-sqlite3', 'express', 'socket.io', 'http', 'path'],
+      },
+    },
   };
 });
