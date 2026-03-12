@@ -1,0 +1,8 @@
+{
+  "name": "ScholarFocus",
+  "description": "A high-fidelity distraction-reduction app for students featuring AI-powered focus monitoring, Socratic tutoring, and deep work immersion.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
