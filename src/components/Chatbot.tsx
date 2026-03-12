@@ -31,7 +31,7 @@ export default function Chatbot() {
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-2.5-flash',
         contents: messages.concat({ role: 'user', content: userMessage }).map(m => ({
           role: m.role === 'assistant' ? 'model' : 'user',
           parts: [{ text: m.content }]
@@ -78,25 +78,23 @@ export default function Chatbot() {
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div className={`flex gap-3 max-w-[80%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                  msg.role === 'user' ? 'bg-leather text-white' : 'bg-primary text-secondary'
-                }`}>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-leather text-white' : 'bg-primary text-secondary'
+                  }`}>
                   {msg.role === 'user' ? <User size={16} /> : <Sparkles size={16} />}
                 </div>
-                <div className={`p-4 rounded-2xl shadow-sm text-sm leading-relaxed ${
-                  msg.role === 'user' 
-                    ? 'bg-secondary text-white rounded-tr-none' 
+                <div className={`p-4 rounded-2xl shadow-sm text-sm leading-relaxed ${msg.role === 'user'
+                    ? 'bg-secondary text-white rounded-tr-none'
                     : 'bg-white text-slate-800 rounded-tl-none border border-slate-100'
-                }`}>
+                  }`}>
                   {msg.content}
                 </div>
               </div>
             </motion.div>
           ))}
           {isTyping && (
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               className="flex justify-start"
             >
               <div className="bg-white border border-slate-100 p-4 rounded-2xl rounded-tl-none flex gap-1">
@@ -119,7 +117,7 @@ export default function Chatbot() {
             placeholder="Ask about a concept..."
             className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 pr-16 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
           />
-          <button 
+          <button
             onClick={handleSend}
             disabled={isTyping}
             className="absolute right-2 top-2 bottom-2 bg-primary text-secondary px-4 rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50"

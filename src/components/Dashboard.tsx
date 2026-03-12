@@ -21,7 +21,7 @@ export default function Dashboard() {
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-2.5-flash',
         contents: `I am studying ${studyTopic}. Generate a "Focus Plan" including: 
         1. 3 Whitelisted academic resources/sites.
         2. 3 Blacklisted distraction categories.
@@ -47,16 +47,16 @@ export default function Dashboard() {
           </div>
           <h2 className="text-3xl font-black mb-4">Ready to lock in?</h2>
           <p className="text-white/60 mb-6 max-w-md">Tell us what you're studying, and our AI will dynamically configure your focus environment.</p>
-          
+
           <div className="flex gap-4 max-w-xl">
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={studyTopic}
               onChange={(e) => setStudyTopic(e.target.value)}
-              placeholder="e.g. Quantum Mechanics, Renaissance Art..." 
+              placeholder="e.g. Quantum Mechanics, Renaissance Art..."
               className="flex-1 bg-white/10 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-white/30"
             />
-            <button 
+            <button
               onClick={generateFocusPlan}
               disabled={isAnalyzing}
               className="btn-primary px-8 flex items-center gap-2 disabled:opacity-50"
@@ -65,19 +65,19 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
-        
+
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full -mr-32 -mt-32" />
       </div>
 
       <AnimatePresence>
         {focusPlan && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             className="glass p-8 rounded-3xl border-2 border-primary/30 relative"
           >
-            <button 
+            <button
               onClick={() => setFocusPlan(null)}
               className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full"
             >
@@ -125,7 +125,7 @@ export default function Dashboard() {
             [Interactive D3 Heatmap Visualization]
           </div>
         </div>
-        
+
         <div className="glass p-8 rounded-3xl">
           <h3 className="text-xl font-bold mb-6">Upcoming Deadlines</h3>
           <div className="space-y-4">
@@ -139,11 +139,10 @@ export default function Dashboard() {
                   <h4 className="font-bold text-slate-800">{item.title}</h4>
                   <p className="text-xs text-slate-500">{item.time}</p>
                 </div>
-                <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase ${
-                  item.priority === 'High' ? 'bg-red-100 text-red-600' : 
-                  item.priority === 'Medium' ? 'bg-amber-100 text-amber-600' : 
-                  'bg-green-100 text-green-600'
-                }`}>
+                <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase ${item.priority === 'High' ? 'bg-red-100 text-red-600' :
+                    item.priority === 'Medium' ? 'bg-amber-100 text-amber-600' :
+                      'bg-green-100 text-green-600'
+                  }`}>
                   {item.priority}
                 </span>
               </div>
