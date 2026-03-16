@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  
+  body {
+    @apply bg-[#FDFBF7] text-slate-900 antialiased;
+    background-image: radial-gradient(circle at 25% 25%, rgba(235, 192, 77, 0.03) 0%, transparent 50%),
+                      radial-gradient(circle at 75% 75%, rgba(46, 93, 155, 0.02) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/90 backdrop-blur-xl border border-white/30 shadow-xl;
+  }
+  
+  .glass-dark {
+    @apply bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+
+  .btn-primary {
+    @apply bg-primary hover:bg-primary/90 text-slate-900 font-semibold px-6 py-3 rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary hover:bg-secondary/90 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl;
+  }
+  
+  .btn-ghost {
+    @apply bg-white/10 hover:bg-white/20 text-current font-medium px-4 py-2 rounded-lg transition-all duration-200 border border-white/10;
+  }
+
+  .card {
+    @apply glass p-6 rounded-2xl;
+  }
+  
+  .card-dark {
+    @apply glass-dark p-6 rounded-2xl text-white;
+  }
+
+  .input-primary {
+    @apply bg-white/80 border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all backdrop-blur-sm;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-secondary via-primary to-leather bg-clip-text text-transparent;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  
+  @keyframes glow {
+    from { box-shadow: 0 0 20px rgba(235, 192, 77, 0.3); }
+    to { box-shadow: 0 0 30px rgba(235, 192, 77, 0.6); }
+  }
+}

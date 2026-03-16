@@ -1,36 +1,41 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Users, Video, Mic, MessageCircle, PhoneOff, UserPlus, Search } from 'lucide-react';
 import { motion } from 'motion/react';
-import { io } from 'socket.io-client';
-
-const socket = io();
+import { io, Socket } from 'socket.io-client';
 
 export default function StudyCircles() {
   const [inCall, setInCall] = useState(false);
   const [room, setRoom] = useState('');
   const [messages, setMessages] = useState<{ user: string; text: string }[]>([]);
   const [inputText, setInputText] = useState('');
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
+    // Connect socket only when component mounts (lazy, not at module load)
+    socketRef.current = io();
+    const socket = socketRef.current;
+
     socket.on('receive-message', (data) => {
       setMessages(prev => [...prev, data]);
     });
+
     return () => {
       socket.off('receive-message');
+      socket.disconnect();
     };
   }, []);
 
   const joinRoom = () => {
-    if (room) {
-      socket.emit('join-room', room);
+    if (room && socketRef.current) {
+      socketRef.current.emit('join-room', room);
       setInCall(true);
     }
   };
 
   const sendMessage = () => {
-    if (inputText && room) {
+    if (inputText && room && socketRef.current) {
       const msg = { user: 'Me', text: inputText, room };
-      socket.emit('send-message', msg);
+      socketRef.current.emit('send-message', msg);
       setMessages(prev => [...prev, msg]);
       setInputText('');
     }

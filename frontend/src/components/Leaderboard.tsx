@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Trophy, Medal, Crown, TrendingUp, User } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { LeaderboardEntry } from '../types';
+import { apiRequest } from '../services/api';
 
 export default function Leaderboard() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/leaderboard')
-      .then(res => res.json())
-      .then(data => {
+    apiRequest('/leaderboard')
+      .then((data: LeaderboardEntry[]) => {
         setEntries(data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch leaderboard:', error);
         setIsLoading(false);
       });
   }, []);

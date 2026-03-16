@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, Coffee, Brain, Settings } from 'lucide-react';
+import { Play, Pause, RotateCcw, Coffee, Brain, Settings, LogIn } from 'lucide-react';
 import { motion } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import StudyTimeline from './StudyTimeline';
+import { useAuth } from '../contexts/AuthContext';
+import { apiService } from '../services/api';
+import LoginModal from './LoginModal';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -14,11 +17,32 @@ interface PomodoroProps {
 }
 
 export default function Pomodoro({ isDeepWork }: PomodoroProps) {
+  const { user, isAuthenticated } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [timeLeft, setTimeLeft] = useState(25 * 60);
   const [isActive, setIsActive] = useState(false);
   const [mode, setMode] = useState<'work' | 'break'>('work');
+  const [currentSession, setCurrentSession] = useState<any>(null);
+  const [userStats, setUserStats] = useState({ totalSessions: 0, todaySessions: 0, streakDays: 0 });
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Load user statistics
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      loadUserStats();
+    }
+  }, [isAuthenticated, user]);
+
+  const loadUserStats = async () => {
+    try {
+      const stats = await apiService.study.getStats();
+      setUserStats(stats);
+    } catch (error) {
+      console.error('Failed to load user stats:', error);
+    }
+  };
+
+  // Timer logic
   useEffect(() => {
     if (isActive && timeLeft > 0) {
       timerRef.current = setInterval(() => {
@@ -26,14 +50,7 @@ export default function Pomodoro({ isDeepWork }: PomodoroProps) {
       }, 1000);
     } else if (timeLeft === 0) {
       setIsActive(false);
-      // Play sound or notification
-      if (mode === 'work') {
-        setMode('break');
-        setTimeLeft(5 * 60);
-      } else {
-        setMode('work');
-        setTimeLeft(25 * 60);
-      }
+      handleTimerComplete();
     } else {
       if (timerRef.current) clearInterval(timerRef.current);
     }
@@ -42,19 +59,100 @@ export default function Pomodoro({ isDeepWork }: PomodoroProps) {
     };
   }, [isActive, timeLeft, mode]);
 
+  const handleTimerComplete = async () => {
+    if (!isAuthenticated || !currentSession) return;
+
+    try {
+      // Complete the current study session
+      await apiService.study.endSession(currentSession.id);
+      
+      // Play notification sound or show notification
+      if (mode === 'work') {
+        setMode('break');
+        setTimeLeft(5 * 60);
+      } else {
+        setMode('work');
+        setTimeLeft(25 * 60);
+      }
+      
+      // Refresh stats
+      loadUserStats();
+      setCurrentSession(null);
+    } catch (error) {
+      console.error('Failed to complete session:', error);
+    }
+  };
+
+  const toggleTimer = async () => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    if (!isActive) {
+      // Starting a new session
+      if (!currentSession && mode === 'work') {
+        try {
+          const session = await apiService.study.startSession({ type: 'pomodoro' });
+          setCurrentSession(session);
+        } catch (error) {
+          console.error('Failed to start session:', error);
+          return;
+        }
+      }
+      setIsActive(true);
+    } else {
+      // Pausing the session
+      setIsActive(false);
+    }
+  };
+
+  const resetTimer = async () => {
+    if (currentSession && isAuthenticated) {
+      try {
+        await apiService.study.endSession(currentSession.id);
+        setCurrentSession(null);
+      } catch (error) {
+        console.error('Failed to end session:', error);
+      }
+    }
+    setIsActive(false);
+    setTimeLeft(mode === 'work' ? 25 * 60 : 5 * 60);
+  };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const toggleTimer = () => setIsActive(!isActive);
-  const resetTimer = () => {
-    setIsActive(false);
-    setTimeLeft(mode === 'work' ? 25 * 60 : 5 * 60);
-  };
-
   const progress = (timeLeft / (mode === 'work' ? 25 * 60 : 5 * 60)) * 100;
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[500px] text-center">
+        <motion.div 
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="bg-[#1A1B1E] border border-white/10 rounded-2xl p-8 max-w-md"
+        >
+          <LogIn size={48} className="mx-auto mb-4 text-primary" />
+          <h3 className="text-xl font-bold text-white mb-2">Sign In Required</h3>
+          <p className="text-white/60 mb-6">
+            Please sign in to track your Pomodoro sessions and save your progress to your profile.
+          </p>
+          <button 
+            onClick={() => setShowLoginModal(true)}
+            className="w-full bg-primary text-secondary px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+          >
+            Sign In to Continue
+          </button>
+        </motion.div>
+
+        <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className={`flex flex-col lg:flex-row items-center justify-center gap-16 ${isDeepWork ? 'h-screen' : 'py-10'}`}>
@@ -121,10 +219,16 @@ export default function Pomodoro({ isDeepWork }: PomodoroProps) {
                   key={i} 
                   className={cn(
                     "w-2 h-1 rounded-full transition-all duration-500",
-                    i < 2 ? "bg-primary shadow-[0_0_8px_rgba(235,192,77,0.5)]" : "bg-white/10"
+                    i < userStats.todaySessions ? "bg-primary shadow-[0_0_8px_rgba(235,192,77,0.5)]" : "bg-white/10"
                   )} 
                 />
               ))}
+            </div>
+            
+            {/* User Stats */}
+            <div className="mt-3 text-center">
+              <div className="text-xs text-white/40 mb-1">Today: {userStats.todaySessions} sessions</div>
+              <div className="text-xs text-white/30">Total: {userStats.totalSessions} | Streak: {userStats.streakDays} days</div>
             </div>
           </div>
 
@@ -179,7 +283,7 @@ export default function Pomodoro({ isDeepWork }: PomodoroProps) {
         )}
       </div>
 
-      {!isDeepWork && (
+      {!isDeepWork && isAuthenticated && (
         <motion.div
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -189,6 +293,8 @@ export default function Pomodoro({ isDeepWork }: PomodoroProps) {
           <StudyTimeline />
         </motion.div>
       )}
+
+      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </div>
   );
 }

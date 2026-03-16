@@ -2,8 +2,12 @@ export interface Task {
   id: number;
   title: string;
   description: string;
-  status: 'pending' | 'completed';
-  due_date?: string;
+  status: 'pending' | 'in_progress' | 'completed';
+  priority?: 'low' | 'medium' | 'high';
+  due_date?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  completed_at?: string | null;
 }
 
 export interface LeaderboardEntry {
