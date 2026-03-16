@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#FDFBF7] text-slate-900;
+  }
+}
+
+.glass {
+  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-sm;
+}
+
+.btn-primary {
+  @apply bg-primary text-slate-900 font-semibold px-4 py-2 rounded-lg hover:bg-primary/90 transition-all active:scale-95;
+}
+
+.btn-secondary {
+  @apply bg-secondary text-white font-semibold px-4 py-2 rounded-lg hover:bg-secondary/90 transition-all active:scale-95;
+}
