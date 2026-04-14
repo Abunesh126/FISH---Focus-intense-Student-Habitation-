@@ -78,6 +78,22 @@ FISH---Focus-intense-Student-Habitation-/
 
 ---
 
+## 📈 **Result Graph**
+
+The graph below illustrates model performance improvement after applying structured prompt engineering.
+
+- **X-axis** → Model Versions / Techniques  
+- **Y-axis** → Accuracy / Validation Score
+
+Comparison included:
+- Raw Prompting
+- Template Prompting
+- Dr. Prompt Engineer Framework
+
+![Result Graph - Prompt Engineering Performance](docs/images/result-graph.png)
+
+---
+
 ## 🚀 **Quick Start**
 
 ### **Prerequisites**
